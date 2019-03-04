@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/romil-punetha/docker-sample-nginx:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/romil-punetha/docker-sample-nginx:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: docker-sample-nginx
+        chartPath: charts/docker-sample-nginx
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/romil-punetha/docker-sample-nginx'
+          image.tag: '{{.DIGEST_HEX}}'
